@@ -76,28 +76,28 @@ This PR establishes the project skeleton. After merging, every future PR builds 
 
 ### Tasks
 
-- [ ] Initialize Next.js 15 (App Router, TypeScript strict mode)
-- [ ] Configure Tailwind v4 with full design system token mapping:
+- [x] Initialize Next.js 15 (App Router, TypeScript strict mode)
+- [x] Configure Tailwind v4 with full design system token mapping:
   - Colors: all surface, primary, secondary, tertiary, outline, error tokens from `design_system.md`
   - Typography: `display-lg`, `headline-md`, `body-md`, `label-sm` as composite utilities (font family + size + weight + tracking + line-height)
   - Spacing: full scale from `design_system.md`
   - Border radius: `none`, `sm`, `md` per button spec
-- [ ] Set up `next/font` for Space Grotesk (400, 700) and Manrope (400, 500, 700)
-- [ ] Create directory structure per CLAUDE.md (app/, features/, components/, hooks/, utils/, lib/, types/, styles/)
-- [ ] Create empty route files: `app/page.tsx`, `app/work/page.tsx`, `app/gallery/page.tsx`, `app/contact/page.tsx`
-- [ ] Create root layout (`app/layout.tsx`) with font providers and minimal HTML structure
-- [ ] Set up `cn()` utility (clsx + tailwind-merge)
-- [ ] Configure ESLint + Prettier
-- [ ] Configure Vitest + React Testing Library
-- [ ] Set up GitHub Actions workflow (lint + typecheck + test on PR)
-- [ ] Add `.nvmrc` (Node 22)
-- [ ] Add `.gitignore` (node_modules, .next, .env*, etc.)
-- [ ] Update CLAUDE.md:
+- [x] Set up `next/font` for Space Grotesk (400, 700) and Manrope (400, 500, 700)
+- [x] Create directory structure per CLAUDE.md (app/, features/, components/, hooks/, utils/, lib/, types/, styles/)
+- [x] Create empty route files: `app/page.tsx`, `app/work/page.tsx`, `app/gallery/page.tsx`, `app/contact/page.tsx`
+- [x] Create root layout (`app/layout.tsx`) with font providers and minimal HTML structure
+- [x] Set up `cn()` utility (clsx + tailwind-merge)
+- [x] Configure ESLint + Prettier
+- [x] Configure Vitest + React Testing Library
+- [x] Set up GitHub Actions workflow (lint + typecheck + test on PR)
+- [x] Add `.nvmrc` (Node 22)
+- [x] Add `.gitignore` (node_modules, .next, .env*, etc.)
+- [x] Update CLAUDE.md:
   - Add testing-with-PR rule
   - Add design system enforcement rules (no arbitrary values, no borders for sections, no shadows, track colors don't cross)
   - Update JS budget to 200KB
   - Replace framer-motion with CSS + Intersection Observer in tech stack
-- [ ] Verify: `npm run dev` serves a blank page, `npm run build` succeeds, `npm run lint` passes, `npm run test` passes (with placeholder test), CI runs green
+- [x] Verify: `npm run dev` serves a blank page, `npm run build` succeeds, `npm run lint` passes, `npm run test` passes (with placeholder test), CI runs green
 
 ### Acceptance Criteria
 
@@ -117,17 +117,17 @@ The reusable building blocks. After this PR, all four pages can be composed from
 
 ### Tasks
 
-- [ ] **NM Monogram:** Create SVG component — N and M interlocked in Space Grotesk geometry, shared vertical stroke removed, square frame. Monochrome (`on_surface`). Export as React component + generate favicon set (16x16, 32x32, 180x180 apple-touch-icon).
-- [ ] **NavBar:** Fixed top bar, solid `surface` background. On scroll, add subtle bottom shadow (`rgba(26,28,27,0.04)`, 8px blur). Monogram left (links to /), nav links right ("Work", "Gallery", "Contact"). Active link: 2px underline, color matches current wing (green on /work, terracotta on /gallery, neutral elsewhere). Height ~64px.
-- [ ] **MobileMenu:** Hamburger icon on mobile (<1024px). Full-screen overlay with links stacked vertically, centered, in `headline-md`. Close button top-right. Slide-down transition.
-- [ ] **Footer:** Name, social links (placeholder URLs), copyright. `surface_container_low` background.
-- [ ] **Button:** Three variants — Primary (flat `primary` background, square corners), Secondary (terracotta, `md` rounding), Tertiary (no background, underline with `surface_tint` stroke). All with press animation (scale 0.98).
-- [ ] **SectionLabel:** `label-sm`, uppercase, +0.1em tracking. Accepts `track` prop ("engineering" | "photography") to set accent color.
-- [ ] **Input / Select / Textarea:** Bottom-border-only style using `outline_variant`. Focus transitions border to accent color. Labels associated via `<label>`.
-- [ ] **ScrollReveal:** Wrapper component using Intersection Observer + CSS animations. Fade-in + translate-up (400ms ease-out). Supports stagger delay prop. Respects `prefers-reduced-motion`.
-- [ ] **SocialLinks:** Icon + label for each platform. Horizontal on desktop, vertical on mobile.
-- [ ] Integrate NavBar + Footer into root layout
-- [ ] Write tests for all components:
+- [x] **NM Monogram:** Create SVG component — N and M interlocked in Space Grotesk geometry, shared vertical stroke removed, square frame. Monochrome (`on_surface`). Export as React component + SVG favicon (`public/icon.svg`).
+- [x] **NavBar:** Fixed top bar, solid `surface` background. On scroll, add subtle bottom shadow (`rgba(26,28,27,0.04)`, 8px blur). Monogram left (links to /), nav links right ("Work", "Gallery", "Contact"). Active link: 2px underline, color matches current wing (green on /work, terracotta on /gallery, neutral elsewhere). Height ~64px.
+- [x] **MobileMenu:** Hamburger icon on mobile (<1024px). Full-screen overlay with links stacked vertically, centered, in `headline-md`. Close button top-right. Slide-down transition.
+- [x] **Footer:** Name, social links (placeholder URLs), copyright. `surface_container_low` background.
+- [x] **Button:** Three variants — Primary (flat `primary` background, square corners), Secondary (terracotta, `md` rounding), Tertiary (no background, underline with `surface_tint` stroke). All with press animation (scale 0.98).
+- [x] **SectionLabel:** `label-sm`, uppercase, +0.1em tracking. Accepts `track` prop ("engineering" | "photography") to set accent color.
+- [x] **Input / Select / Textarea:** Bottom-border-only style using `outline_variant`. Focus transitions border to accent color. Labels associated via `<label>`.
+- [x] **ScrollReveal:** Wrapper component using Intersection Observer + CSS animations. Fade-in + translate-up (400ms ease-out). Supports stagger delay prop. Respects `prefers-reduced-motion`.
+- [x] **SocialLinks:** Icon + label for each platform. Horizontal on desktop, vertical on mobile.
+- [x] Integrate NavBar + Footer into root layout
+- [x] Write tests for all components:
   - NavBar: renders links, active state matches route, monogram links to home
   - MobileMenu: opens/closes, focus trap, escape to close
   - Button: renders all variants, click handler fires, keyboard accessible
