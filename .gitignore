@@ -40,6 +40,9 @@ next-env.d.ts
 
 # Testing
 coverage/
+playwright-report/
+test-results/
+.playwright-mcp/
 
 # Images (processed output — originals and processed photos are gitignored)
 originals/
