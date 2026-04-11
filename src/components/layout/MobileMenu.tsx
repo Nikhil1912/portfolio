@@ -10,6 +10,24 @@ interface MobileMenuProps {
   onClose: () => void;
 }
 
+function CloseIcon(): React.ReactElement {
+  return (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      aria-hidden="true"
+    >
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  );
+}
+
 const NAV_LINKS = [
   { href: '/work', label: 'Work' },
   { href: '/gallery', label: 'Gallery' },
@@ -96,19 +114,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps): React.ReactEle
         aria-label="Close menu"
         className="absolute top-4 right-6 p-2 text-on-surface hover:text-on-surface-variant transition-colors min-h-11 min-w-11 flex items-center justify-center"
       >
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          aria-hidden="true"
-        >
-          <line x1="18" y1="6" x2="6" y2="18" />
-          <line x1="6" y1="6" x2="18" y2="18" />
-        </svg>
+        <CloseIcon />
       </button>
 
       {/* Nav links */}

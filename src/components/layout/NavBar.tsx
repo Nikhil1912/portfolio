@@ -13,6 +13,25 @@ const NAV_LINKS = [
   { href: '/contact', label: 'Contact' },
 ];
 
+function HamburgerIcon(): React.ReactElement {
+  return (
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 22 22"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      aria-hidden="true"
+    >
+      <line x1="2" y1="6" x2="20" y2="6" />
+      <line x1="2" y1="11" x2="20" y2="11" />
+      <line x1="2" y1="16" x2="20" y2="16" />
+    </svg>
+  );
+}
+
 function getActiveLinkColor(pathname: string, linkHref: string): string {
   if (pathname !== linkHref) return '';
   if (linkHref === '/work') return 'border-b-2 border-primary';
@@ -75,20 +94,7 @@ export function NavBar(): React.ReactElement {
             aria-controls="mobile-menu"
             className="lg:hidden p-2 text-on-surface hover:text-on-surface-variant transition-colors min-h-11 min-w-11 flex items-center justify-center"
           >
-            <svg
-              width="22"
-              height="22"
-              viewBox="0 0 22 22"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              aria-hidden="true"
-            >
-              <line x1="2" y1="6" x2="20" y2="6" />
-              <line x1="2" y1="11" x2="20" y2="11" />
-              <line x1="2" y1="16" x2="20" y2="16" />
-            </svg>
+            <HamburgerIcon />
           </button>
         </div>
       </header>
