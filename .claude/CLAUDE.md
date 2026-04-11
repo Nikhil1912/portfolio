@@ -9,7 +9,7 @@ Personal website for Nikhil Mehra ("Code & Light"). Two-wing portfolio: Engineer
 - **Framework:** Next.js 15 (App Router, static export where possible)
 - **Language:** TypeScript (strict mode)
 - **Styling:** Tailwind CSS v4
-- **Testing:** Vitest + React Testing Library
+- **Testing:** Vitest + React Testing Library (unit/component) · Playwright (E2E + visual via MCP)
 - **Linting:** ESLint + Prettier
 - **Photo Grid:** react-photo-album
 - **Lightbox:** yet-another-react-lightbox (with zoom plugin)
@@ -113,11 +113,13 @@ src/
   - Work: experience renders, project cards link correctly, PDF download triggers.
   - Contact: form validates, submits, shows success/error state.
   - Home: navigation to both wings works.
+- **Visual/manual verification** via the Playwright MCP server — navigate pages, take screenshots, and inspect rendered output directly in Claude Code sessions. Use this to verify UI after implementing each page, especially layout, active states, and responsive behaviour. Run `npm run dev` first.
 - **Skip trivial tests.** Don't test that a static heading renders. Test behavior, interaction, and conditional logic.
 
 ### Rules
-- Framework: Vitest + React Testing Library.
-- Test files live next to the code they test: `PhotoGrid.tsx` → `PhotoGrid.test.tsx`.
+- Unit/component framework: Vitest + React Testing Library.
+- E2E framework: Playwright (`npm run test:e2e`). Config in `playwright.config.ts`. Uses installed Google Chrome (`channel: 'chrome'`) — no separate browser download needed.
+- Test files live next to the code they test: `PhotoGrid.tsx` → `PhotoGrid.test.tsx`. E2E tests live in `e2e/`.
 - Use `screen.getByRole` / `getByLabelText` over `getByTestId`. Test what the user sees.
 - No snapshot tests. They add noise and break on any change.
 - Mock external services (R2, Resend) in tests. Never mock internal modules unless absolutely necessary.
