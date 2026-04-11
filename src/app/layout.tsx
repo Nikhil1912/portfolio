@@ -33,9 +33,9 @@ interface RootLayoutProps {
 export default function RootLayout({ children }: RootLayoutProps): React.ReactElement {
   return (
     <html lang="en" className={`${spaceGrotesk.variable} ${manrope.variable}`}>
-      <body className="bg-surface text-on-surface font-body antialiased">
+      <body className="min-h-screen flex flex-col bg-surface text-on-surface font-body antialiased">
         <NavBar />
-        <main className="pt-16">{children}</main>
+        <main className="flex-1 pt-16">{children}</main>
         <Footer />
       </body>
     </html>

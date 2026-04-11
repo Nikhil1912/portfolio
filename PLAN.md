@@ -152,11 +152,11 @@ The reusable building blocks. After this PR, all four pages can be composed from
 
 ### Tasks
 
-- [ ] **Hero section:** "Nikhil" in `display-lg`, left-aligned with generous left padding. "Code & Light" in `headline-md`, offset right (asymmetry). 1-2 sentence intro in `body-md`, further offset. Single group fade-in with translate-up (~12px, 400ms ease-out) using ScrollReveal.
-- [ ] **TrackTeaser:** Asymmetric split — left panel (~45%) Engineering, right panel (~55%) Photography. Engineering: `surface_container_low` background, "The Work" label in `label-sm` Forest Green, placeholder image/texture. Photography: `surface_container_lowest` background, "The Gallery" label in `label-sm` Terracotta, placeholder hero photo. Both panels are full clickable links. On mobile: stack vertically, full width.
-- [ ] Panels fade in together after hero with subtle scale-up (0.97 -> 1.0).
-- [ ] `app/page.tsx` is a thin wrapper importing from `features/home/`.
-- [ ] Write tests:
+- [x] **Hero section:** "Nikhil" in `display-lg`, left-aligned with generous left padding. "Code & Light" in `headline-md`, offset right (asymmetry). 1-2 sentence intro in `body-md`, further offset. Single group fade-in with translate-up (~12px, 400ms ease-out) using ScrollReveal.
+- [x] **TrackTeaser:** Asymmetric split — left panel (~45%) Engineering, right panel (~55%) Photography. Engineering: `surface_container_low` background, "The Work" label in `label-sm` Forest Green, placeholder image/texture. Photography: `surface_container_lowest` background, "The Gallery" label in `label-sm` Terracotta, placeholder hero photo. Both panels are full clickable links. On mobile: stack vertically, full width.
+- [x] Panels fade in together after hero with subtle scale-up (0.97 -> 1.0).
+- [x] `app/page.tsx` is a thin wrapper importing from `features/home/`.
+- [x] Write tests:
   - Hero text renders
   - Both panels link to correct routes (/work, /gallery)
   - Panels are keyboard-navigable (Tab + Enter)
