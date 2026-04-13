@@ -41,7 +41,7 @@ src/
 │   │   ├── components/         # Hero, TrackTeaser, etc.
 │   │   └── index.ts
 │   ├── work/
-│   │   ├── components/         # ExperienceCard, ProjectCard, SkillRibbon, etc.
+│   │   ├── components/         # ExperienceCard, ProjectCard, SkillTag, WorkPage
 │   │   ├── data/               # Experience and project data (typed constants)
 │   │   └── index.ts
 │   ├── gallery/
