@@ -12,6 +12,8 @@ All architectural and tooling decisions made during planning. This is the canoni
 | Image placeholders | Base64 blur (20px wide, inlined) | Simpler than blurhash, no client-side decoder, works without JS. |
 | Image pipeline phasing | Local placeholders -> sharp script -> R2 | Unblocks gallery UI development before infrastructure is ready. |
 | Work page data model | Typed TypeScript constants | Site content updates are infrequent. No need for CMS or markdown files. |
+| SkillRibbon | Removed | Skills shown contextually inline with each role/project convey more information than a collected dump. Ribbon added visual noise without informational value. |
+| Section padding pattern | `px-8` on outer element, `max-w-[1200px] mx-auto` on inner div | Matches NavBar/Hero pattern; content aligns correctly at all viewport widths including >1200px. |
 | Tailwind version | v4 | CSS-based config, faster builds, automatic content detection. |
 | Contact form | Resend (notify owner + confirm visitor) | Free tier, stays in codebase, no external form service. |
 | Photo categories | Metadata only, no filtering UI | Keep gallery simple. Can add filtering later if needed. |
@@ -177,19 +179,18 @@ The reusable building blocks. After this PR, all four pages can be composed from
 
 ### Tasks
 
-- [ ] **Data layer:** Define TypeScript interfaces for Experience and Project. Create placeholder data in `features/work/data/` (2-3 experience entries, 2-3 projects with realistic-looking placeholder content).
-- [ ] **Page header:** "The Work" in `display-lg` Forest Green. Subtitle in `body-md`. Download Resume button (Primary variant, links to placeholder PDF).
-- [ ] **Experience section:** `surface_container_low` background zone. Current role gets prominence (company in `headline-md`, title in `body-md` bold, impact statement). Past roles compact (single row each). `spacing.8` between entries, no dividers. Skill tags inline near relevant roles.
-- [ ] **SkillTag:** Small `label-sm` tag on `surface_container_low` background.
-- [ ] **SkillRibbon:** Horizontal scrolling bar of all skill tags between Experience and Projects. `surface_container_low` background (Metadata Ribbon pattern).
-- [ ] **Projects section:** Back to base `surface` background. 2-3 project cards stacked vertically with `spacing.12` between. Each card: `surface_container_lowest` background, screenshot placeholder on one side + text on the other (alternating sides on desktop, stacked on mobile). Project name in `headline-md`, blurb in `body-md`, GitHub link as Tertiary button, tech tags below.
-- [ ] **Scroll animations:** Experience entries fade in on scroll (staggered 80ms). Project cards slide in from alternating sides (~20px translate + opacity).
-- [ ] `app/work/page.tsx` is a thin wrapper.
-- [ ] Write tests:
+- [x] **Data layer:** Define TypeScript interfaces for Experience and Project. Create placeholder data in `features/work/data/` (2-3 experience entries, 2-3 projects with realistic-looking placeholder content).
+- [x] **Page header:** "The Work" in `display-lg` Forest Green. Subtitle in `body-md`. Download Resume button (Primary variant, links to placeholder PDF).
+- [x] **Experience section:** `surface_container_low` background zone. Current role gets prominence (company in `headline-md`, title in `body-md` bold, impact statement). Past roles compact (single row each). `spacing.8` between entries, no dividers. Skill tags inline near relevant roles.
+- [x] **SkillTag:** Small `label-sm` tag on `surface_container_low` background.
+- [x] ~~**SkillRibbon:**~~ Removed — see Decisions Log. Skills appear contextually inline with each role and project card instead.
+- [x] **Projects section:** Back to base `surface` background. 2-3 project cards stacked vertically with `spacing.12` between. Each card: `surface_container_lowest` background, screenshot placeholder on one side + text on the other (alternating sides on desktop, stacked on mobile). Project name in `headline-md`, blurb in `body-md`, GitHub link as Tertiary button, tech tags below.
+- [x] **Scroll animations:** Experience entries fade in on scroll (staggered 80ms). Project cards slide in from alternating sides (~20px translate + opacity).
+- [x] `app/work/page.tsx` is a thin wrapper.
+- [x] Write tests:
   - Experience entries render from data
   - Project cards render with correct links
   - Resume download button has correct href
-  - Skill ribbon is horizontally scrollable on overflow
 
 ### Acceptance Criteria
 

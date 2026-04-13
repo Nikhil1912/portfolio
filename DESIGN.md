@@ -76,9 +76,9 @@ Four pages. No nested routes. Clean and flat.
    - The overall feel is a clean, sparse timeline — not a dense CV.
 
 3. **Skills**
-   - No dedicated "Skills" header competing for attention. Instead, skills appear as small inline tags near the experience entries.
-   - Implementation: a horizontal flow of `label-sm` tags on `surface_container_low` (#f4f4f1) backgrounds with `on_surface_variant` text. Tags cluster near the role where the skill is most relevant.
-   - On the overall page level, a subtle collected skills bar can sit between Experience and Projects — a single horizontal row of tags, scrollable on mobile if needed. Uses `surface_container_low` (#f4f4f1) as background.
+   - No dedicated "Skills" header competing for attention. Skills appear as small inline tags near the experience entries and below each project card.
+   - Implementation: a horizontal flow of `label-sm` tags on `surface_container_lowest` (#ffffff) backgrounds with `on_surface_variant` text. Tags cluster near the role/project where the skill is most relevant.
+   - No collected skills ribbon — inline tags per role convey more context than a decontextualised dump.
 
 4. **Projects Section**
    - Background: back to base `surface` to create rhythm.
@@ -353,8 +353,7 @@ Components to build, derived from the page designs:
 | `TrackTeaser` | Home | The asymmetric split panel (Engineering / Photography) |
 | `SectionLabel` | Work, Gallery | `Label-SM` uppercase heading with track accent |
 | `ExperienceCard` | Work | Role, company, timeframe, description |
-| `SkillTag` | Work | Small inline tag, `Label-SM` on `surface_container_low` |
-| `SkillRibbon` | Work | Horizontal scrolling bar of skill tags (Metadata Ribbon pattern) |
+| `SkillTag` | Work | Small inline tag, `Label-SM` on `surface_container_lowest` |
 | `ProjectCard` | Work | Screenshot + blurb + GitHub link + tech tags |
 | `PhotoGrid` | Gallery | Justified row layout via react-photo-album |
 | `LoadMoreButton` | Gallery | Loads next batch, disappears when exhausted |
