@@ -73,6 +73,24 @@ describe('ScrollReveal', () => {
     expect(mockDisconnect).toHaveBeenCalled();
   });
 
+  it('uses panel-reveal classes when variant is scale', () => {
+    render(<ScrollReveal variant="scale"><p>Content</p></ScrollReveal>);
+    const wrapper = screen.getByText('Content').parentElement!;
+    expect(wrapper.className).toContain('panel-reveal-hidden');
+  });
+
+  it('becomes panel-reveal-visible when scale variant enters viewport', () => {
+    render(<ScrollReveal variant="scale"><p>Content</p></ScrollReveal>);
+    const wrapper = screen.getByText('Content').parentElement!;
+
+    act(() => {
+      observerCallback?.([{ isIntersecting: true } as IntersectionObserverEntry]);
+    });
+
+    expect(wrapper.className).toContain('panel-reveal-visible');
+    expect(wrapper.className).not.toContain('panel-reveal-hidden');
+  });
+
   it('passes reduced-motion handling to CSS (no special JS logic needed)', () => {
     // The @media (prefers-reduced-motion) in globals.css sets
     // animation/transition-duration to 0.01ms — ScrollReveal just adds/removes

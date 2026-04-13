@@ -1,1 +1,2 @@
-// Home feature — populated in Phase 3.
+export { Hero } from './components/Hero';
+export { TrackTeaser } from './components/TrackTeaser';

@@ -7,12 +7,14 @@ interface ScrollRevealProps {
   children: React.ReactNode;
   delay?: number;
   className?: string;
+  variant?: 'default' | 'scale';
 }
 
 export function ScrollReveal({
   children,
   delay = 0,
   className,
+  variant = 'default',
 }: ScrollRevealProps): React.ReactElement {
   const ref = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -35,10 +37,13 @@ export function ScrollReveal({
     return () => observer.disconnect();
   }, []);
 
+  const hiddenClass = variant === 'scale' ? 'panel-reveal-hidden' : 'scroll-reveal-hidden';
+  const visibleClass = variant === 'scale' ? 'panel-reveal-visible' : 'scroll-reveal-visible';
+
   return (
     <div
       ref={ref}
-      className={cn(isVisible ? 'scroll-reveal-visible' : 'scroll-reveal-hidden', className)}
+      className={cn(isVisible ? visibleClass : hiddenClass, className)}
       style={delay ? { transitionDelay: `${delay}ms` } : undefined}
     >
       {children}
