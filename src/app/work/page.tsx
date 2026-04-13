@@ -1,7 +1,11 @@
-export default function WorkPage(): React.ReactElement {
-  return (
-    <main>
-      <p className="text-body-md p-8">Work — coming in Phase 4.</p>
-    </main>
-  );
+import type { Metadata } from 'next';
+import { WorkPage } from '@/features/work';
+
+export const metadata: Metadata = {
+  title: 'The Work — Nikhil Mehra',
+  description: 'Software engineering experience, projects, and skills.',
+};
+
+export default function WorkRoutePage(): React.ReactElement {
+  return <WorkPage />;
 }

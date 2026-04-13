@@ -7,7 +7,7 @@ interface ScrollRevealProps {
   children: React.ReactNode;
   delay?: number;
   className?: string;
-  variant?: 'default' | 'scale';
+  variant?: 'default' | 'scale' | 'slide-left' | 'slide-right';
 }
 
 export function ScrollReveal({
@@ -37,8 +37,22 @@ export function ScrollReveal({
     return () => observer.disconnect();
   }, []);
 
-  const hiddenClass = variant === 'scale' ? 'panel-reveal-hidden' : 'scroll-reveal-hidden';
-  const visibleClass = variant === 'scale' ? 'panel-reveal-visible' : 'scroll-reveal-visible';
+  const hiddenClass =
+    variant === 'scale'
+      ? 'panel-reveal-hidden'
+      : variant === 'slide-left'
+        ? 'slide-left-hidden'
+        : variant === 'slide-right'
+          ? 'slide-right-hidden'
+          : 'scroll-reveal-hidden';
+  const visibleClass =
+    variant === 'scale'
+      ? 'panel-reveal-visible'
+      : variant === 'slide-left'
+        ? 'slide-left-visible'
+        : variant === 'slide-right'
+          ? 'slide-right-visible'
+          : 'scroll-reveal-visible';
 
   return (
     <div
