@@ -107,6 +107,32 @@
   transform: scale(1);
 }
 
+@utility slide-left-hidden {
+  opacity: 0;
+  transform: translateX(-20px);
+  transition:
+    opacity 400ms ease-out,
+    transform 400ms ease-out;
+}
+
+@utility slide-left-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+@utility slide-right-hidden {
+  opacity: 0;
+  transform: translateX(20px);
+  transition:
+    opacity 400ms ease-out,
+    transform 400ms ease-out;
+}
+
+@utility slide-right-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
 /* ─── Composite typography utilities ──────────────────────────── */
 
 @utility text-display-lg {
