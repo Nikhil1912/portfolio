@@ -391,6 +391,7 @@ The reusable building blocks. After this PR, all four pages can be composed from
 - [ ] Add camera/lens info to gallery subtitle (optional)
 - [ ] Configure Vercel production deployment
 - [ ] Set environment variables in Vercel (RESEND_API_KEY, CONTACT_EMAIL_TO, R2 credentials)
+- [ ] Verify a sending domain in Resend and update the `from` address in `src/features/contact/actions/sendMessage.ts` (currently uses `onboarding@resend.dev` sandbox default)
 - [ ] Configure custom domain in Vercel
 - [ ] Final Lighthouse run on production
 - [ ] Final manual test of all pages on production URL
