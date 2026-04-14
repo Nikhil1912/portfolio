@@ -1,1 +1,1 @@
-// Contact feature — populated in Phase 5.
+export { ContactPage } from './components/ContactPage';
