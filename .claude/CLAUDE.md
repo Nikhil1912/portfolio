@@ -96,6 +96,7 @@ src/
 - Map all design system tokens from `design_system.md` into the Tailwind theme config (colors, spacing, typography, border-radius). Reference tokens by name, not raw hex values.
 - Never use inline `style={{}}` unless dynamically computed (e.g., grid dimensions from aspect ratios).
 - Never use CSS modules or styled-components.
+- **tailwind-merge is configured** (`src/utils/cn.ts`) to treat `text-display-lg`, `text-headline-md`, `text-body-md`, and `text-label-sm` as font-size utilities, not text-color utilities. This means they can safely coexist with `text-on-primary`, `text-on-surface`, etc. on the same element without one being dropped. Do not remove this configuration — without it, any element using both a composite typography utility and a text-color class will silently lose the color.
 
 ### General
 - Comments only where logic is non-obvious. No JSDoc on every function. No "this function does X" comments that restate the code.

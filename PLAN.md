@@ -23,6 +23,9 @@ All architectural and tooling decisions made during planning. This is the canoni
 | JS budget | 200KB gzipped per page | Relaxed from 150KB to give gallery page headroom. |
 | Logo | NM Monogram (Concept B), monogram only in nav | Square frame, interlocked letters, shared stroke removed. |
 | Design system enforcement | Tailwind theme tokens + component primitives + CLAUDE.md rules | Three layers: make wrong thing hard, right thing easy, violations visible. |
+| Contact page heading color | `text-primary` (Forest Green) instead of neutral `on_surface` | User preference — matches the Work page heading. Deliberate exception to the "track colors don't cross" rule. |
+| Contact page layout | Asymmetric split (context 40% left, form 60% right) instead of centered card | Centered card felt dated; split mirrors the TrackTeaser language and gives the page personality. |
+| Contact social links | Removed social links section; replaced with scroll-to-footer anchor | Footer already has social links — duplication without value. A single `label-sm` anchor pointing to `#footer` is cleaner. |
 | Node version | 22 (.nvmrc) | System default. |
 | Package manager | npm | |
 | Git remote auth | HTTPS + Personal Access Token | Work machine with work SSH config; per-repo identity for personal GitHub. |
@@ -210,22 +213,22 @@ The reusable building blocks. After this PR, all four pages can be composed from
 
 ### Tasks
 
-- [ ] **Contact form:** Card on `surface_container_lowest`, centered, max-width ~600px. Fields: Name (text), Email (email), Reason (select: "Freelance / Contract", "Photography Inquiry", "Just Saying Hi", "Other"), Message (textarea). All inputs use the shared Input/Select/Textarea components.
-- [ ] **Client-side validation:** Required fields, email format. Inline error messages below fields.
-- [ ] **Server action:** `features/contact/actions/sendMessage.ts`. Sends email via Resend to the configured address. Sends confirmation email to the visitor ("Thanks for reaching out! I'll get back to you soon."). Returns success/error.
-- [ ] **Success state:** Form replaced by confirmation message + subtle checkmark animation.
-- [ ] **Error state:** Inline error message below submit button in `error` color.
-- [ ] **Alternative contact section:** "Or find me elsewhere." + SocialLinks component with placeholder URLs.
-- [ ] **Page header:** "Get in Touch" in `display-lg`. Subtitle in `body-md`.
-- [ ] **Environment variables:** `RESEND_API_KEY`, `CONTACT_EMAIL_TO` — documented in `.env.example`.
-- [ ] `app/contact/page.tsx` is a thin wrapper.
-- [ ] Write tests:
+- [x] **Contact form:** Asymmetric split layout — context panel left (40%), form panel right (60%). Fields: Name (text), Email (email), Reason (select: "Freelance / Contract", "Photography Inquiry", "Just Saying Hi", "Other"), Message (textarea). All inputs use the shared Input/Select/Textarea components.
+- [x] **Client-side validation:** Required fields, email format. Inline error messages below fields.
+- [x] **Server action:** `features/contact/actions/sendMessage.ts`. Sends email via Resend to the configured address. Sends confirmation email to the visitor. Returns success/error. Note: Resend SDK returns `{ data, error }` — does not throw on failure; results must be checked explicitly.
+- [x] **Success state:** Form replaced by confirmation message + SVG checkmark animation.
+- [x] **Error state:** Inline error message below submit button in `error` color.
+- [x] ~~**Alternative contact section:**~~ Replaced with a `text-label-sm` scroll anchor ("Or find me at the bottom of the page ↓") pointing to `#footer`. See Decisions Log.
+- [x] **Page header:** "Get in Touch" in `display-lg` Forest Green. "The inbox is open." subtitle in `body-md`.
+- [x] **Environment variables:** `RESEND_API_KEY`, `CONTACT_EMAIL_TO` — documented in `.env.example`.
+- [x] `app/contact/page.tsx` is a thin wrapper.
+- [x] Write tests:
   - Form validates required fields
   - Form validates email format
   - Submit calls server action (mock Resend)
   - Success state renders after submission
   - Error state renders on failure
-  - Social links render and are accessible
+  - Footer scroll hint renders with correct href
 
 ### Acceptance Criteria
 

@@ -153,35 +153,35 @@ Four pages. No nested routes. Clean and flat.
 
 **Purpose:** Let people reach out — whether for freelance inquiries, photography bookings, or just to connect.
 
-**Color:** Neutral. Back to base `surface`. Accent colors from both tracks can appear in the social links (green for GitHub, terracotta for Instagram, etc.) but the page itself is track-neutral.
+**Color:** Forest Green (`primary`) for the page heading — deliberate exception to the track-neutral default, matches the Work page heading. See Decisions Log in PLAN.md. Body content is otherwise neutral (`surface` base).
 
 **Layout:**
 
 1. **Page Header**
-   - "Get in Touch" in `Display-LG`, `on_surface` (#1a1c1b).
-   - Subtitle: "Have a project in mind, want a print, or just want to say hello." in `Body-MD`.
+   - "Get in Touch" in `Display-LG`, Forest Green `primary` (#163526).
+   - Subtitle: "The inbox is open." in `Body-MD`, `on_surface_variant`. Short and distinct from the left panel copy.
 
-2. **Contact Form**
-   - Background: `surface_container_lowest` (#ffffff) card, centered, max-width ~600px.
-   - Fields (all using the design system's minimalist input style — bottom border only, `outline_variant`):
+2. **Asymmetric Split**
+   - Full-width container (max 1200px), split into two panels side by side on desktop. Stacks vertically on mobile.
+   - **Left panel (~40%):** `surface_container_low` (#f4f4f1) background. Contains:
+     - "Let's talk." in `Headline-MD`.
+     - Body copy covering photography inquiries, conversations, and a subtle hint toward the right professional opportunity.
+     - Scroll anchor at the bottom: "Or find me at the bottom of the page ↓" in `Label-SM`, links to `#footer`. Replaces a duplicate social links section — footer already carries those links.
+   - **Right panel (~60%):** `surface_container_lowest` (#ffffff) background. Contains the contact form.
+   - Fields (bottom border only, `outline_variant` style):
      - **Name** (text input)
      - **Email** (email input)
-     - **Reason** (select dropdown): "Freelance / Contract", "Photography Inquiry", "Just Saying Hi", "Other"
-     - **Message** (textarea, 4-5 rows)
-   - Submit button: Primary Engineer style (flat `primary` background, square corners). Text: "Send Message".
-   - On success: form replaced by a confirmation message ("Thanks, Nikhil. I'll get back to you soon." — wait, that's the visitor. "Thanks! I'll get back to you soon.") with a subtle checkmark animation.
-   - On error: inline error message below the button in `error` color.
-
-3. **Alternative Contact**
-   - Below the form card, a section: "Or find me elsewhere." in `Label-SM`.
-   - Social links: GitHub, LinkedIn, Instagram (if applicable), email address.
-   - Each as an icon + label, horizontal row on desktop, vertical stack on mobile.
-   - Hover: subtle color shift to the link's brand color or the relevant track accent.
+     - **Reason** (select): "Freelance / Contract", "Photography Inquiry", "Just Saying Hi", "Other"
+     - **Message** (textarea, 5 rows)
+   - Submit button: Primary style (flat `primary` background, square corners). Text: "Send Message".
+   - On success: form replaced by confirmation message + animated SVG checkmark.
+   - On error: inline error message below button in `error` color.
 
 **Animations:**
-- Form card fades in on page load.
-- Input focus: bottom border transitions to accent color (smooth, 200ms).
-- Submit button: subtle press animation (scale 0.98 on click).
+- Split panel fades in on scroll (ScrollReveal, 100ms delay).
+- Input focus: bottom border transitions to accent color (200ms ease-out).
+- Submit button: scale 0.98 on click (`btn-press` utility).
+- Success checkmark: SVG path draws in (stroke-dashoffset, 400ms ease-out).
 
 ---
 
