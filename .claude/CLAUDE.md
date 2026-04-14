@@ -193,3 +193,4 @@ All visual decisions are governed by `design_system.md`. Key rules to enforce:
 - **Typography scale is fixed.** Use `text-display-lg`, `text-headline-md`, `text-body-md`, `text-label-sm`. No ad-hoc `text-xl`, `text-2xl`, `font-bold`, or `leading-*` overrides.
 - **Max 3 surface tones per page.** Use `surface` (default), `surface-container-low` (inset sections), `surface-container-lowest` (lifted cards). Do not introduce additional tones.
 - **Space Grotesk + Manrope only.** No other fonts. Use `font-heading` for headings, `font-body` for body text.
+- **Page header accent rule.** Every page header uses a `w-0.5 h-14 shrink-0 mt-1` vertical bar to the left of the `display-lg` heading, inside a `flex items-start gap-5` wrapper. Colors by page: `bg-on-surface` (Home), `bg-primary` (Work, Contact), `bg-secondary` (Gallery). Always `aria-hidden="true"`.
