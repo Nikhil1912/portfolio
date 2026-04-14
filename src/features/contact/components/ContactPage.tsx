@@ -11,10 +11,15 @@ export function ContactPage(): React.ReactElement {
           className="px-8 pt-12 pb-10 lg:pt-16 lg:pb-12"
         >
           <div className="max-w-[1200px] mx-auto">
-            <h1 className="text-display-lg text-primary">Get in Touch</h1>
-            <p className="text-body-md text-on-surface-variant mt-4 max-w-lg">
-              The inbox is open.
-            </p>
+            <div className="flex items-start gap-5">
+              <div className="w-0.5 h-14 shrink-0 bg-primary mt-1" aria-hidden="true" />
+              <div className="flex-1">
+                <h1 className="text-display-lg text-primary">Get in Touch</h1>
+                <p className="text-body-md text-on-surface-variant mt-4 max-w-lg">
+                  The inbox is open.
+                </p>
+              </div>
+            </div>
           </div>
         </section>
       </ScrollReveal>
