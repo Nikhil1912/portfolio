@@ -39,7 +39,7 @@ interface PhotoManifestEntry {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const REPO_ROOT = path.resolve(import.meta.dirname, '..');
+const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const ORIGINALS_DIR = path.join(REPO_ROOT, 'originals');
 const OUTPUT_DIR = path.join(REPO_ROOT, 'public', 'photos');
 const MANIFEST_PATH = path.join(REPO_ROOT, 'public', 'photos.json');
