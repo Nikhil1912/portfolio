@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { GalleryPage } from '@/features/gallery';
+import photosData from '../../../public/photos.json';
+import type { Photo } from '@/types/photo';
 
 export const metadata: Metadata = {
   title: 'The Gallery — Nikhil Mehra',
@@ -7,5 +9,6 @@ export const metadata: Metadata = {
 };
 
 export default function GalleryRoutePage(): React.ReactElement {
-  return <GalleryPage />;
+  const photos = photosData as Photo[];
+  return <GalleryPage photos={photos} />;
 }

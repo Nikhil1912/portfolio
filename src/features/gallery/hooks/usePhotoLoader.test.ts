@@ -4,16 +4,26 @@ import { usePhotoLoader } from './usePhotoLoader';
 import type { Photo } from '@/types/photo';
 
 function makePhotos(count: number): Photo[] {
-  return Array.from({ length: count }, (_, i) => ({
-    id: `photo-${String(i).padStart(3, '0')}`,
-    title: `Photo ${i + 1}`,
-    category: 'landscape' as const,
-    width: 1600,
-    height: 900,
-    src: `https://picsum.photos/seed/test${i}/1600/900`,
-    alt: `Test photo ${i + 1}`,
-    order: i + 1,
-  }));
+  return Array.from({ length: count }, (_, i) => {
+    const id = `photo-${String(i).padStart(3, '0')}`;
+    return {
+      id,
+      title: `Photo ${i + 1}`,
+      category: 'landscape' as const,
+      width: 1600,
+      height: 900,
+      src: `https://picsum.photos/seed/test${i}/1600/900`,
+      alt: `Test photo ${i + 1}`,
+      order: i + 1,
+      placeholder: 'data:image/webp;base64,abc',
+      srcset: {
+        thumbnail: `https://picsum.photos/seed/test${i}/400/225`,
+        medium: `https://picsum.photos/seed/test${i}/800/450`,
+        large: `https://picsum.photos/seed/test${i}/1600/900`,
+        full: `https://picsum.photos/seed/test${i}/1600/900`,
+      },
+    };
+  });
 }
 
 describe('usePhotoLoader', () => {

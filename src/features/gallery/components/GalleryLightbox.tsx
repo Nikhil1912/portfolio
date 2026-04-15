@@ -23,7 +23,8 @@ export function GalleryLightbox({
   if (!isOpen) return null;
 
   const slides = photos.map((photo) => ({
-    src: photo.src,
+    // Use the full-res variant in the lightbox; fall back to src for placeholder photos
+    src: photo.srcset?.full ?? photo.src,
     width: photo.width,
     height: photo.height,
     alt: photo.alt,

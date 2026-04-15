@@ -16,6 +16,9 @@ export function PhotoGrid({ photos, onPhotoClick }: PhotoGridProps): React.React
     height: photo.height,
     alt: photo.alt,
     key: photo.id,
+    // Pass through the extra fields so our render function can reach them
+    placeholder: photo.placeholder,
+    srcset: photo.srcset,
   }));
 
   return (
@@ -29,15 +32,16 @@ export function PhotoGrid({ photos, onPhotoClick }: PhotoGridProps): React.React
       spacing={8}
       onClick={({ index }) => onPhotoClick(index)}
       render={{
-        // Custom image rendering for the fade-in-on-load effect.
-        // Using <img> directly is intentional: react-photo-album's justified layout
-        // sets exact pixel dimensions, and Phase 7 will add our own srcset pipeline.
-        image: ({ alt, ...rest }) => (
+        image: ({ alt, src, srcSet, sizes, style, className, onClick }) => (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            {...rest}
             alt={alt}
-            className="block cursor-pointer opacity-0 transition-opacity duration-300"
+            src={src}
+            srcSet={srcSet}
+            sizes={sizes ?? '(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 33vw'}
+            style={style}
+            className={`${className ?? ''} block cursor-pointer opacity-0 transition-opacity duration-300`}
+            onClick={onClick}
             onLoad={(e) => {
               e.currentTarget.classList.remove('opacity-0');
               e.currentTarget.classList.add('opacity-100');

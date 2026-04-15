@@ -8,6 +8,10 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
     globals: true,
+    environmentMatchGlobs: [
+      // Script tests run in Node — they use Node.js APIs and don't need jsdom
+      ['scripts/**', 'node'],
+    ],
   },
   resolve: {
     alias: {

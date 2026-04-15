@@ -3,10 +3,10 @@
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import { ScrollReveal } from '@/components';
-import { photos as allPhotos } from '../data/photos';
 import { usePhotoLoader } from '../hooks/usePhotoLoader';
 import { PhotoGrid } from './PhotoGrid';
 import { LoadMoreButton } from './LoadMoreButton';
+import type { Photo } from '@/types/photo';
 
 // Dynamically import the lightbox so it is excluded from the initial bundle.
 const GalleryLightbox = dynamic(
@@ -14,7 +14,11 @@ const GalleryLightbox = dynamic(
   { ssr: false },
 );
 
-export function GalleryPage(): React.ReactElement {
+interface GalleryPageProps {
+  photos: Photo[];
+}
+
+export function GalleryPage({ photos: allPhotos }: GalleryPageProps): React.ReactElement {
   const { visiblePhotos, hasMore, loadMore } = usePhotoLoader(allPhotos);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 

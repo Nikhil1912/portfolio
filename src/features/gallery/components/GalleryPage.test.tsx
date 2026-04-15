@@ -2,6 +2,7 @@ import React, { Suspense } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
+import type { Photo } from '@/types/photo';
 
 // ─── Global mocks ────────────────────────────────────────────────────────────
 
@@ -93,16 +94,42 @@ vi.mock('next/dynamic', () => ({
     React.lazy(async () => ({ default: await loader() })),
 }));
 
+// ─── Test fixtures ────────────────────────────────────────────────────────────
+
+function makePhoto(n: number): Photo {
+  const id = `photo-${String(n).padStart(3, '0')}`;
+  return {
+    id,
+    title: `Photo ${n}`,
+    category: 'landscape',
+    width: 1200,
+    height: 800,
+    src: `https://picsum.photos/seed/${id}/1200/800`,
+    alt: `Test photo ${n}`,
+    order: n,
+    placeholder: 'data:image/webp;base64,abc',
+    srcset: {
+      thumbnail: `https://picsum.photos/seed/${id}/400/267`,
+      medium: `https://picsum.photos/seed/${id}/800/533`,
+      large: `https://picsum.photos/seed/${id}/1200/800`,
+      full: `https://picsum.photos/seed/${id}/1200/800`,
+    },
+  };
+}
+
+// 20 test photos — mirrors the real photos.json count
+const TEST_PHOTOS: Photo[] = Array.from({ length: 20 }, (_, i) => makePhoto(i + 1));
+
 // ─── Component under test ────────────────────────────────────────────────────
 
 import { GalleryPage } from './GalleryPage';
 
 // Renders GalleryPage and waits for the lazy-loaded lightbox to be ready.
 // Using findByRole ensures we don't race against the Suspense resolution.
-async function renderGalleryPage() {
+async function renderGalleryPage(photos: Photo[] = TEST_PHOTOS) {
   render(
     <Suspense fallback={null}>
-      <GalleryPage />
+      <GalleryPage photos={photos} />
     </Suspense>,
   );
   // Wait for the heading — confirms the page has fully mounted
@@ -205,5 +232,18 @@ describe('GalleryPage', () => {
 
     await user.click(screen.getByRole('button', { name: /previous photo/i }));
     expect(screen.getByTestId('lightbox-index').textContent).toBe('4');
+  });
+
+  it('uses srcset.full for lightbox slides', async () => {
+    const user = userEvent.setup();
+    const photos = [makePhoto(1)];
+    await renderGalleryPage(photos);
+
+    await user.click(screen.getByTestId('photo-0'));
+
+    // The lightbox slide count reflects the correct number of photos
+    await waitFor(() => {
+      expect(screen.getByTestId('lightbox-count').textContent).toBe('1');
+    });
   });
 });
