@@ -33,6 +33,10 @@ All architectural and tooling decisions made during planning. This is the canoni
 | Primary button style | Flat solid `primary` | Gradients add visual complexity; flat is more minimal (Linear, Vercel, Stripe precedent). |
 | Hero animation | Single group fade-in | Per-element stagger (3 animations in first second) feels busy; single fade is more confident. |
 | Surface tones | Max 3 per page | Simplify from 5-6 tones to: `surface`, `surface_container_low`, `surface_container_lowest`. |
+| Gallery subtitle | "Analog light. Digital glass." | Captures the film-aesthetic-on-digital-sensor character without being inaccurate about the equipment. |
+| Lightbox zoom buttons | Hidden via `render={{ buttonZoom: () => null }}` | Zoom via scroll (desktop) and pinch (mobile) is sufficient; toolbar buttons are redundant chrome inconsistent with the minimal lightbox spec. |
+| Page header accent rule | 2px vertical bar in track color, left of display heading, on all four pages | Site-wide typographic pattern. Colors: `bg-on-surface` (Home), `bg-primary` (Work, Contact), `bg-secondary` (Gallery). |
+| Gallery grain texture | CSS `::before` noise SVG at 4.5% opacity with `mix-blend-mode: multiply` on gallery header | Subtle film-grain reference aligned with "analog light" aesthetic. Implemented as `grain-texture` utility in globals.css. |
 
 ---
 
@@ -246,14 +250,14 @@ The reusable building blocks. After this PR, all four pages can be composed from
 
 ### Tasks
 
-- [ ] **photos.json schema:** Define TypeScript interface. Create placeholder manifest with ~20 entries (use freely licensed placeholder photos or solid color images with varied aspect ratios).
-- [ ] **PhotoGrid:** Justified row-based layout using `react-photo-album`. Target row heights: desktop ~280px, tablet ~240px, mobile ~200px. Gap: `spacing.2`. Grid area on `surface_container_low` background.
-- [ ] **LoadMoreButton:** Initial load 16 photos. "Load More" Secondary button (Terracotta, centered). Each press loads next 16. Disappears when exhausted, replaced by "That's everything -- for now." in `label-sm`.
-- [ ] **Lightbox:** Dynamic import of `yet-another-react-lightbox` + zoom plugin. Full-screen dark overlay. Photo at max viewport size, centered. Close button top-right, arrow nav, counter bottom-center. Keyboard nav (arrows, Escape). Swipe on mobile. Zoom (pinch on mobile, scroll on desktop). Open transition: fade/scale. Close: reverse.
-- [ ] **Photo fade-in:** Grid images fade in (opacity 0 -> 1, 300ms) as they load.
-- [ ] **Page header:** "The Gallery" in `display-lg` Terracotta. Optional subtitle in `body-md`.
-- [ ] `app/gallery/page.tsx` is a thin wrapper.
-- [ ] Write tests:
+- [x] **photos.json schema:** Define TypeScript interface. Create placeholder manifest with ~20 entries (use freely licensed placeholder photos or solid color images with varied aspect ratios).
+- [x] **PhotoGrid:** Justified row-based layout using `react-photo-album`. Target row heights: desktop ~280px, tablet ~240px, mobile ~200px. Gap: `spacing.2`. Grid area on `surface_container_low` background.
+- [x] **LoadMoreButton:** Initial load 16 photos. "Load More" Secondary button (Terracotta, centered). Each press loads next 16. Disappears when exhausted, replaced by "That's everything -- for now." in `label-sm`.
+- [x] **Lightbox:** Dynamic import of `yet-another-react-lightbox` + zoom plugin. Full-screen dark overlay. Photo at max viewport size, centered. Close button top-right, arrow nav, counter bottom-center. Keyboard nav (arrows, Escape). Swipe on mobile. Zoom (pinch on mobile, scroll on desktop). Zoom buttons hidden — gesture-only per spec.
+- [x] **Photo fade-in:** Grid images fade in (opacity 0 -> 1, 300ms) as they load.
+- [x] **Page header:** "The Gallery" in `display-lg` Terracotta. Subtitle: "Analog light. Digital glass." Grain texture overlay and accent rule (see Decisions Log).
+- [x] `app/gallery/page.tsx` is a thin wrapper.
+- [x] Write tests:
   - Grid renders correct number of initial photos (16)
   - Load More button loads next batch
   - Load More disappears when all photos loaded

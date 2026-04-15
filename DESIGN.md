@@ -34,7 +34,7 @@ Four pages. No nested routes. Clean and flat.
 **Layout (top to bottom):**
 
 1. **Hero Section**
-   - Name: "Nikhil" in `Display-LG` (Space Grotesk, 3.5rem, -0.04em tracking), aligned left with generous left padding (~`spacing.16`).
+   - Name: "Nikhil" in `Display-LG` (Space Grotesk, 3.5rem, -0.04em tracking), aligned left with generous left padding (~`spacing.16`). A 2px vertical `on_surface` accent bar sits to the left of the heading (the site-wide page header accent rule).
    - Tagline: "Code & Light" in `Headline-MD` (Space Grotesk, 1.75rem), color `on_surface_variant` (#424843), positioned below and slightly offset to the right of the name (intentional asymmetry).
    - A brief 1-2 sentence intro in `Body-MD` (Manrope), further offset. Something like: "Software engineer by trade, photographer by instinct. I build web applications and chase light."
    - Large vertical whitespace below the hero (`spacing.20` or more) to let it breathe.
@@ -64,7 +64,7 @@ Four pages. No nested routes. Clean and flat.
 **Layout (top to bottom):**
 
 1. **Page Header**
-   - "The Work" in `Display-LG`, Forest Green `primary` (#163526).
+   - "The Work" in `Display-LG`, Forest Green `primary` (#163526). A 2px vertical `primary` accent bar sits to the left of the heading (the site-wide page header accent rule).
    - A one-liner subtitle in `Body-MD`: "What I build, and where I've built it."
    - Download Resume button: Primary Engineer button style (flat `primary` background, square corners, `on_primary` text). Downloads a PDF.
 
@@ -108,8 +108,9 @@ Four pages. No nested routes. Clean and flat.
 **Layout (top to bottom):**
 
 1. **Page Header**
-   - "The Gallery" in `Display-LG`, Terracotta `secondary` (#944925).
-   - Optional one-liner: "Street scenes and landscapes. Shot on [camera name]." in `Body-MD`, `on_surface_variant`.
+   - "The Gallery" in `Display-LG`, Terracotta `secondary` (#944925). A 2px vertical `secondary` accent bar sits to the left of the heading (the site-wide page header accent rule).
+   - Subtitle: "Analog light. Digital glass." in `Body-MD`, `on_surface_variant`. References the film-aesthetic-on-digital-sensor character of the photography.
+   - A subtle grain texture overlay (`grain-texture` CSS utility) is applied to the header section — a film-grain reference at ~4.5% opacity with `mix-blend-mode: multiply`.
 
 2. **Photo Grid**
    - **Grid style: Justified/row-based layout** (uniform row heights, variable image widths based on aspect ratio). This respects each photo's natural proportions while maintaining structural rhythm — fits the "Architectural Precision" ethos better than a masonry layout.
@@ -133,7 +134,7 @@ Four pages. No nested routes. Clean and flat.
    - Photo displayed at maximum size that fits the viewport, centered.
    - **Swipe navigation** (mobile) and arrow keys / arrow buttons (desktop) to move between photos.
    - **Pinch-to-zoom** (mobile) and scroll-to-zoom or click-to-zoom (desktop). Zoom should allow at least 2x.
-   - Minimal chrome: close button (top-right), left/right arrows (sides), photo counter "12 / 87" in `Label-SM` (bottom-center).
+   - Minimal chrome: close button (top-right), left/right arrows (sides), photo counter "12 / 87" in `Label-SM` (bottom-center). Zoom toolbar buttons are hidden — zoom is gesture-only (scroll on desktop, pinch on mobile).
    - No EXIF data, no titles in the lightbox — just the image.
    - **Swipe down to dismiss** (mobile).
    - Library: `yet-another-react-lightbox` with its zoom plugin.
@@ -158,7 +159,7 @@ Four pages. No nested routes. Clean and flat.
 **Layout:**
 
 1. **Page Header**
-   - "Get in Touch" in `Display-LG`, Forest Green `primary` (#163526).
+   - "Get in Touch" in `Display-LG`, Forest Green `primary` (#163526). A 2px vertical `primary` accent bar sits to the left of the heading (the site-wide page header accent rule).
    - Subtitle: "The inbox is open." in `Body-MD`, `on_surface_variant`. Short and distinct from the left panel copy.
 
 2. **Asymmetric Split**

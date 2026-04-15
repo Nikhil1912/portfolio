@@ -11,19 +11,24 @@ export function WorkPage(): React.ReactElement {
       <ScrollReveal>
         <section aria-label="The Work" className="px-8 pt-12 pb-16 lg:pt-16 lg:pb-20">
           <div className="max-w-[1200px] mx-auto">
-            <h1 className="text-display-lg text-primary">The Work</h1>
-            <p className="text-body-md text-on-surface-variant mt-4 max-w-lg">
-              What I build, and where I&apos;ve built it.
-            </p>
-            <div className="mt-8">
-              <a
-                href="/resume.pdf"
-                download
-                className="inline-flex items-center btn-press bg-primary text-on-primary rounded-none px-6 py-3 text-label-sm hover:bg-primary-container focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                aria-label="Download resume PDF"
-              >
-                Download Resume
-              </a>
+            <div className="flex items-start gap-5">
+              <div className="w-0.5 h-14 shrink-0 bg-primary mt-1" aria-hidden="true" />
+              <div className="flex-1">
+                <h1 className="text-display-lg text-primary">The Work</h1>
+                <p className="text-body-md text-on-surface-variant mt-4 max-w-lg">
+                  What I build, and where I&apos;ve built it.
+                </p>
+                <div className="mt-8">
+                  <a
+                    href="/resume.pdf"
+                    download
+                    className="inline-flex items-center btn-press bg-primary text-on-primary rounded-none px-6 py-3 text-label-sm hover:bg-primary-container focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                    aria-label="Download resume PDF"
+                  >
+                    Download Resume
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </section>
