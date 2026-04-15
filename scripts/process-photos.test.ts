@@ -8,6 +8,7 @@ import {
   generateBase64Placeholder,
   resizeToWebP,
   mergeManifest,
+  SUPPORTED_EXTENSIONS,
 } from './process-photos';
 
 // ─── Mock sharp ───────────────────────────────────────────────────────────────
@@ -58,6 +59,30 @@ describe('filenameToId', () => {
 
   it('handles filenames that are already clean', () => {
     expect(filenameToId('photo-001.webp')).toBe('photo-001');
+  });
+});
+
+// ─── SUPPORTED_EXTENSIONS ────────────────────────────────────────────────────
+
+describe('SUPPORTED_EXTENSIONS', () => {
+  it('accepts common formats', () => {
+    for (const ext of ['.jpg', '.jpeg', '.png', '.webp', '.tiff', '.tif']) {
+      expect(SUPPORTED_EXTENSIONS.has(ext)).toBe(true);
+    }
+  });
+
+  it('accepts .heif', () => {
+    expect(SUPPORTED_EXTENSIONS.has('.heif')).toBe(true);
+  });
+
+  it('accepts .heic', () => {
+    expect(SUPPORTED_EXTENSIONS.has('.heic')).toBe(true);
+  });
+
+  it('rejects unsupported formats', () => {
+    for (const ext of ['.raw', '.cr2', '.arw', '.bmp', '.gif']) {
+      expect(SUPPORTED_EXTENSIONS.has(ext)).toBe(false);
+    }
   });
 });
 

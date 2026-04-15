@@ -52,7 +52,7 @@ const SIZES = {
 } as const;
 
 const PLACEHOLDER_WIDTH = 20;
-const SUPPORTED_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.tiff', '.tif']);
+export const SUPPORTED_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.tiff', '.tif', '.heif', '.heic']);
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
 
