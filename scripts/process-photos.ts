@@ -1,47 +1,48 @@
 /**
- * Photo processing pipeline — Phase 7
+ * Photo processing pipeline — Phase 7 / Phase 8
  *
  * Reads original photos from /originals/, generates four WebP variants plus a
  * base64 blur placeholder for each, writes them to public/photos/[id]/, and
  * updates public/photos.json with the full manifest.
  *
- * Usage:
- *   npm run photos:process
- *   npm run photos:process -- --local-only   (same behaviour; flag reserved for Phase 8)
+ * In Phase 8 mode (R2 env vars present and --local-only not passed), processed
+ * images are also uploaded to Cloudflare R2 and photos.json is written with R2
+ * public URLs instead of local paths.
  *
- * Structure note: utilities, types, and pipeline logic are intentionally kept
- * in this single file — every helper here has exactly one consumer (this script).
- * If Phase 8 R2 upload logic or future additions push this significantly past
- * ~300 lines, split into scripts/lib/image.ts (sharp utils), scripts/lib/manifest.ts,
- * and scripts/lib/types.ts.
+ * Usage:
+ *   npm run photos:process                # process + upload to R2 (if configured)
+ *   npm run photos:process -- --local-only  # process locally only, skip R2 upload
  */
 
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import sharp from 'sharp';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface PhotoSrcSet {
-  thumbnail: string;
-  medium: string;
-  large: string;
-  full: string;
+// Load .env.local before anything reads process.env — tsx does not do this
+// automatically (it's a Next.js convention, not a Node.js one).
+const REPO_ROOT_FOR_ENV = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const envLocalPath = path.join(REPO_ROOT_FOR_ENV, '.env.local');
+if (fs.existsSync(envLocalPath)) {
+  for (const line of fs.readFileSync(envLocalPath, 'utf-8').split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const eq = trimmed.indexOf('=');
+    if (eq === -1) continue;
+    const key = trimmed.slice(0, eq).trim();
+    const value = trimmed.slice(eq + 1).trim();
+    // Don't overwrite values already set in the shell environment
+    if (!(key in process.env)) process.env[key] = value;
+  }
 }
 
-interface PhotoManifestEntry {
-  id: string;
-  title: string;
-  category: string;
-  width: number;
-  height: number;
-  src: string;
-  alt: string;
-  order: number;
-  placeholder: string;
-  srcset: PhotoSrcSet;
-}
+import { SIZES, SUPPORTED_EXTENSIONS, filenameToId, idToTitle, generateBase64Placeholder, resizeToWebP } from './lib/image.js';
+import { loadExistingManifest, buildManifest } from './lib/manifest.js';
+import { loadR2Config, createR2Client, uploadPhotoVariants } from './lib/r2.js';
+import type { PhotoManifestEntry, PhotoSrcSet } from './lib/types.js';
+
+// Re-export for tests that import from this file directly
+export { filenameToId, idToTitle, computeAspectRatio, generateBase64Placeholder, resizeToWebP, SUPPORTED_EXTENSIONS } from './lib/image.js';
+export { buildManifest } from './lib/manifest.js';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -49,81 +50,6 @@ const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..
 const ORIGINALS_DIR = path.join(REPO_ROOT, 'originals');
 const OUTPUT_DIR = path.join(REPO_ROOT, 'public', 'photos');
 const MANIFEST_PATH = path.join(REPO_ROOT, 'public', 'photos.json');
-
-const SIZES = {
-  thumbnail: 400,
-  medium: 800,
-  large: 1600,
-  full: 2400,
-} as const;
-
-const PLACEHOLDER_WIDTH = 20;
-export const SUPPORTED_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.tiff', '.tif', '.heif', '.heic']);
-
-// ─── Utilities ────────────────────────────────────────────────────────────────
-
-/** Slugify a filename into an id: strip extension, lowercase, replace spaces/underscores with hyphens */
-export function filenameToId(filename: string): string {
-  return path.basename(filename, path.extname(filename))
-    .toLowerCase()
-    .replace(/[\s_]+/g, '-')
-    .replace(/[^a-z0-9-]/g, '');
-}
-
-/** Title-case the id for use as an auto-generated alt/title */
-export function idToTitle(id: string): string {
-  return id
-    .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-}
-
-/** Compute the aspect ratio width/height, rounded to 4 decimal places */
-export function computeAspectRatio(width: number, height: number): number {
-  if (height === 0) throw new Error('Height cannot be zero when computing aspect ratio');
-  return Math.round((width / height) * 10000) / 10000;
-}
-
-/**
- * Generate a 20px-wide blurred WebP thumbnail and return it as a base64 data URI.
- * The URI is suitable for use as an <img> src while the real image loads.
- */
-export async function generateBase64Placeholder(imagePath: string): Promise<string> {
-  const buffer = await sharp(imagePath)
-    .rotate() // apply EXIF orientation before any other operation
-    .resize({ width: PLACEHOLDER_WIDTH })
-    .blur(4)
-    .webp({ quality: 20 })
-    .toBuffer();
-  return `data:image/webp;base64,${buffer.toString('base64')}`;
-}
-
-/**
- * Resize the image to the given width (preserving aspect ratio) and save as WebP.
- * If the original is narrower than the target width, the original size is kept.
- * Returns the actual output dimensions.
- */
-export async function resizeToWebP(
-  imagePath: string,
-  outputPath: string,
-  targetWidth: number,
-): Promise<{ width: number; height: number }> {
-  // .rotate() with no args reads the EXIF orientation tag and physically rotates
-  // the image to match it, then strips the tag. Without this, portrait photos
-  // from phones appear sideways because the raw pixel data is landscape-oriented.
-  const metadata = await sharp(imagePath).rotate().metadata();
-  const originalWidth = metadata.width ?? 0;
-
-  const pipeline = sharp(imagePath).rotate().webp({ quality: 82 });
-
-  // Don't upscale — use original dimensions if smaller than target
-  if (originalWidth > targetWidth) {
-    pipeline.resize({ width: targetWidth, withoutEnlargement: true });
-  }
-
-  const info = await pipeline.toFile(outputPath);
-  return { width: info.width, height: info.height };
-}
 
 // ─── Core pipeline ────────────────────────────────────────────────────────────
 
@@ -150,10 +76,8 @@ async function processPhoto(
     }),
   );
 
-  // Base64 placeholder
   const placeholder = await generateBase64Placeholder(originalPath);
 
-  // The "large" variant is the canonical src and dimensions source
   const largeResult = sizeResults.find((r) => r.sizeName === 'large')!;
   const { width, height } = largeResult.dimensions;
 
@@ -167,7 +91,7 @@ async function processPhoto(
   return {
     id,
     title,
-    category: 'street', // default; user can edit photos.json to set actual category
+    category: 'street',
     width,
     height,
     src: `/photos/${id}/large.webp`,
@@ -178,46 +102,11 @@ async function processPhoto(
   };
 }
 
-// ─── Manifest helpers ─────────────────────────────────────────────────────────
-
-function loadExistingManifest(): PhotoManifestEntry[] {
-  if (!fs.existsSync(MANIFEST_PATH)) return [];
-  const raw = fs.readFileSync(MANIFEST_PATH, 'utf-8');
-  return JSON.parse(raw) as PhotoManifestEntry[];
-}
-
-/**
- * Build the manifest from freshly-processed entries, preserving any manual
- * edits (title, category, alt, order) from the existing manifest for photos
- * that are still present in originals/.
- *
- * Photos that were removed from originals/ are dropped from the manifest —
- * the manifest is always a faithful reflection of what was actually processed.
- */
-export function buildManifest(
-  existing: PhotoManifestEntry[],
-  incoming: PhotoManifestEntry[],
-): PhotoManifestEntry[] {
-  const existingById = new Map(existing.map((e) => [e.id, e]));
-  return incoming
-    .map((entry) => {
-      const prev = existingById.get(entry.id);
-      return {
-        ...entry,
-        // Preserve manually-set fields so re-running the pipeline doesn't
-        // overwrite titles/categories the user has already edited
-        title: prev?.title ?? entry.title,
-        category: prev?.category ?? entry.category,
-        alt: prev?.alt ?? entry.alt,
-        order: prev?.order ?? entry.order,
-      };
-    })
-    .sort((a, b) => a.order - b.order);
-}
-
 // ─── Entry point ─────────────────────────────────────────────────────────────
 
 async function main(): Promise<void> {
+  const localOnly = process.argv.includes('--local-only');
+
   if (!fs.existsSync(ORIGINALS_DIR)) {
     console.error(`\nNo originals/ directory found at: ${ORIGINALS_DIR}`);
     console.error('Create an originals/ directory at the repo root and add your photos to it.\n');
@@ -227,7 +116,7 @@ async function main(): Promise<void> {
   const files = fs
     .readdirSync(ORIGINALS_DIR)
     .filter((f) => SUPPORTED_EXTENSIONS.has(path.extname(f).toLowerCase()))
-    .sort(); // consistent ordering
+    .sort();
 
   if (files.length === 0) {
     console.log('\nNo supported images found in originals/. Nothing to process.\n');
@@ -236,14 +125,34 @@ async function main(): Promise<void> {
 
   console.log(`\nFound ${files.length} image(s) in originals/\n`);
 
+  // Determine R2 mode
+  const r2Config = localOnly ? null : loadR2Config();
+  if (!localOnly && r2Config === null) {
+    console.log('R2 env vars not set — running in local-only mode (pass --local-only to suppress this message).\n');
+  } else if (r2Config !== null) {
+    console.log(`R2 mode: uploading to bucket "${r2Config.bucketName}"\n`);
+  }
+
+  const r2Client = r2Config ? createR2Client(r2Config) : null;
+
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
-  const existing = loadExistingManifest();
+  const existing = loadExistingManifest(MANIFEST_PATH);
   const incoming: PhotoManifestEntry[] = [];
 
   for (let i = 0; i < files.length; i++) {
     const originalPath = path.join(ORIGINALS_DIR, files[i]);
     const entry = await processPhoto(originalPath, i + 1);
+
+    // If R2 is configured, upload variants and rewrite URLs to R2 public URLs
+    if (r2Client && r2Config) {
+      const photoOutputDir = path.join(OUTPUT_DIR, entry.id);
+      console.log(`  Uploading to R2: ${entry.id}`);
+      const { srcset, src } = await uploadPhotoVariants(r2Client, r2Config, entry.id, photoOutputDir);
+      entry.srcset = srcset;
+      entry.src = src;
+    }
+
     incoming.push(entry);
   }
 
@@ -251,10 +160,13 @@ async function main(): Promise<void> {
   fs.writeFileSync(MANIFEST_PATH, JSON.stringify(merged, null, 2) + '\n');
 
   console.log(`\nDone. Manifest updated: ${MANIFEST_PATH}`);
-  console.log(`Total photos in manifest: ${merged.length}\n`);
+  console.log(`Total photos in manifest: ${merged.length}`);
+  if (r2Config) {
+    console.log(`Image URLs: ${r2Config.publicUrl}/photos/[id]/[size].webp`);
+  }
+  console.log();
 }
 
-// Only run when executed directly — not when imported by tests
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   main().catch((err: unknown) => {
     console.error('\nProcessing failed:', err);
