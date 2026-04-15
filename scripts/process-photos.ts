@@ -84,6 +84,7 @@ export function computeAspectRatio(width: number, height: number): number {
  */
 export async function generateBase64Placeholder(imagePath: string): Promise<string> {
   const buffer = await sharp(imagePath)
+    .rotate() // apply EXIF orientation before any other operation
     .resize({ width: PLACEHOLDER_WIDTH })
     .blur(4)
     .webp({ quality: 20 })
@@ -101,10 +102,13 @@ export async function resizeToWebP(
   outputPath: string,
   targetWidth: number,
 ): Promise<{ width: number; height: number }> {
-  const metadata = await sharp(imagePath).metadata();
+  // .rotate() with no args reads the EXIF orientation tag and physically rotates
+  // the image to match it, then strips the tag. Without this, portrait photos
+  // from phones appear sideways because the raw pixel data is landscape-oriented.
+  const metadata = await sharp(imagePath).rotate().metadata();
   const originalWidth = metadata.width ?? 0;
 
-  const pipeline = sharp(imagePath).webp({ quality: 82 });
+  const pipeline = sharp(imagePath).rotate().webp({ quality: 82 });
 
   // Don't upscale — use original dimensions if smaller than target
   if (originalWidth > targetWidth) {
@@ -177,27 +181,32 @@ function loadExistingManifest(): PhotoManifestEntry[] {
 }
 
 /**
- * Merge newly processed entries into the existing manifest.
- * Existing entries for the same id are replaced; new entries are appended.
- * Order values from existing entries are preserved unless overridden.
+ * Build the manifest from freshly-processed entries, preserving any manual
+ * edits (title, category, alt, order) from the existing manifest for photos
+ * that are still present in originals/.
+ *
+ * Photos that were removed from originals/ are dropped from the manifest —
+ * the manifest is always a faithful reflection of what was actually processed.
  */
-export function mergeManifest(
+export function buildManifest(
   existing: PhotoManifestEntry[],
   incoming: PhotoManifestEntry[],
 ): PhotoManifestEntry[] {
-  const map = new Map(existing.map((e) => [e.id, e]));
-  for (const entry of incoming) {
-    // Preserve manually-set title/category/alt/order from existing manifest
-    const prev = map.get(entry.id);
-    map.set(entry.id, {
-      ...entry,
-      title: prev?.title ?? entry.title,
-      category: prev?.category ?? entry.category,
-      alt: prev?.alt ?? entry.alt,
-      order: prev?.order ?? entry.order,
-    });
-  }
-  return Array.from(map.values()).sort((a, b) => a.order - b.order);
+  const existingById = new Map(existing.map((e) => [e.id, e]));
+  return incoming
+    .map((entry) => {
+      const prev = existingById.get(entry.id);
+      return {
+        ...entry,
+        // Preserve manually-set fields so re-running the pipeline doesn't
+        // overwrite titles/categories the user has already edited
+        title: prev?.title ?? entry.title,
+        category: prev?.category ?? entry.category,
+        alt: prev?.alt ?? entry.alt,
+        order: prev?.order ?? entry.order,
+      };
+    })
+    .sort((a, b) => a.order - b.order);
 }
 
 // ─── Entry point ─────────────────────────────────────────────────────────────
@@ -228,11 +237,11 @@ async function main(): Promise<void> {
 
   for (let i = 0; i < files.length; i++) {
     const originalPath = path.join(ORIGINALS_DIR, files[i]);
-    const entry = await processPhoto(originalPath, existing.length + i + 1);
+    const entry = await processPhoto(originalPath, i + 1);
     incoming.push(entry);
   }
 
-  const merged = mergeManifest(existing, incoming);
+  const merged = buildManifest(existing, incoming);
   fs.writeFileSync(MANIFEST_PATH, JSON.stringify(merged, null, 2) + '\n');
 
   console.log(`\nDone. Manifest updated: ${MANIFEST_PATH}`);

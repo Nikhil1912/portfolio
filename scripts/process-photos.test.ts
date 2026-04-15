@@ -1,13 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import * as fs from 'node:fs';
-import * as path from 'node:path';
 import {
   filenameToId,
   idToTitle,
   computeAspectRatio,
   generateBase64Placeholder,
   resizeToWebP,
-  mergeManifest,
+  buildManifest,
   SUPPORTED_EXTENSIONS,
 } from './process-photos';
 
@@ -16,11 +14,13 @@ import {
 const mockToBuffer = vi.fn();
 const mockToFile = vi.fn();
 const mockMetadata = vi.fn();
+const mockRotate = vi.fn();
 const mockBlur = vi.fn();
 const mockWebp = vi.fn();
 const mockResize = vi.fn();
 
 const mockSharpInstance = {
+  rotate: mockRotate,
   resize: mockResize,
   blur: mockBlur,
   webp: mockWebp,
@@ -30,6 +30,7 @@ const mockSharpInstance = {
 };
 
 // Each chained method returns the same mock instance
+mockRotate.mockReturnValue(mockSharpInstance);
 mockResize.mockReturnValue(mockSharpInstance);
 mockBlur.mockReturnValue(mockSharpInstance);
 mockWebp.mockReturnValue(mockSharpInstance);
@@ -37,6 +38,13 @@ mockWebp.mockReturnValue(mockSharpInstance);
 vi.mock('sharp', () => ({
   default: vi.fn(() => mockSharpInstance),
 }));
+
+function resetChainMocks() {
+  mockRotate.mockReturnValue(mockSharpInstance);
+  mockResize.mockReturnValue(mockSharpInstance);
+  mockBlur.mockReturnValue(mockSharpInstance);
+  mockWebp.mockReturnValue(mockSharpInstance);
+}
 
 // ─── filenameToId ─────────────────────────────────────────────────────────────
 
@@ -59,6 +67,10 @@ describe('filenameToId', () => {
 
   it('handles filenames that are already clean', () => {
     expect(filenameToId('photo-001.webp')).toBe('photo-001');
+  });
+
+  it('handles HEIC filenames', () => {
+    expect(filenameToId('IMG_4829.HEIC')).toBe('img-4829');
   });
 });
 
@@ -137,10 +149,7 @@ describe('generateBase64Placeholder', () => {
 
   afterEach(() => {
     vi.clearAllMocks();
-    // Re-apply chaining mocks after clearAllMocks
-    mockResize.mockReturnValue(mockSharpInstance);
-    mockBlur.mockReturnValue(mockSharpInstance);
-    mockWebp.mockReturnValue(mockSharpInstance);
+    resetChainMocks();
   });
 
   it('returns a data URI with the correct MIME type', async () => {
@@ -152,6 +161,11 @@ describe('generateBase64Placeholder', () => {
     const result = await generateBase64Placeholder('/fake/photo.jpg');
     const base64Part = result.replace('data:image/webp;base64,', '');
     expect(base64Part).toBe(Buffer.from('fake-webp-data').toString('base64'));
+  });
+
+  it('applies EXIF rotation before resizing', async () => {
+    await generateBase64Placeholder('/fake/photo.jpg');
+    expect(mockRotate).toHaveBeenCalled();
   });
 
   it('resizes to 20px width', async () => {
@@ -170,9 +184,16 @@ describe('generateBase64Placeholder', () => {
 describe('resizeToWebP', () => {
   afterEach(() => {
     vi.clearAllMocks();
-    mockResize.mockReturnValue(mockSharpInstance);
-    mockBlur.mockReturnValue(mockSharpInstance);
-    mockWebp.mockReturnValue(mockSharpInstance);
+    resetChainMocks();
+  });
+
+  it('applies EXIF rotation before resizing', async () => {
+    mockMetadata.mockResolvedValue({ width: 4000, height: 3000 });
+    mockToFile.mockResolvedValue({ width: 1600, height: 1200 });
+
+    await resizeToWebP('/fake/photo.jpg', '/fake/out/large.webp', 1600);
+
+    expect(mockRotate).toHaveBeenCalled();
   });
 
   it('resizes to target width when original is larger', async () => {
@@ -212,9 +233,9 @@ describe('resizeToWebP', () => {
   });
 });
 
-// ─── mergeManifest ────────────────────────────────────────────────────────────
+// ─── buildManifest ────────────────────────────────────────────────────────────
 
-describe('mergeManifest', () => {
+describe('buildManifest', () => {
   const baseEntry = {
     id: 'morning-mist',
     title: 'Morning Mist',
@@ -234,39 +255,47 @@ describe('mergeManifest', () => {
   };
 
   it('returns incoming entries when manifest is empty', () => {
-    const result = mergeManifest([], [baseEntry]);
+    const result = buildManifest([], [baseEntry]);
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe('morning-mist');
   });
 
-  it('replaces an existing entry with the same id', () => {
+  it('updates placeholder/srcset for an existing entry', () => {
     const updated = { ...baseEntry, placeholder: 'data:image/webp;base64,NEW' };
-    const result = mergeManifest([baseEntry], [updated]);
+    const result = buildManifest([baseEntry], [updated]);
     expect(result).toHaveLength(1);
     expect(result[0].placeholder).toBe('data:image/webp;base64,NEW');
   });
 
+  it('drops entries that are no longer in originals/', () => {
+    const stale = { ...baseEntry, id: 'old-placeholder', order: 2 };
+    // stale is in existing but not in incoming (i.e. not in originals/)
+    const result = buildManifest([baseEntry, stale], [baseEntry]);
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe('morning-mist');
+  });
+
   it('preserves manually-set category from existing manifest', () => {
     const incoming = { ...baseEntry, category: 'street' };
-    const result = mergeManifest([baseEntry], [incoming]);
+    const result = buildManifest([baseEntry], [incoming]);
     expect(result[0].category).toBe('landscape'); // preserved from existing
   });
 
   it('preserves manually-set title from existing manifest', () => {
     const incoming = { ...baseEntry, title: 'Auto Generated Title' };
-    const result = mergeManifest([baseEntry], [incoming]);
+    const result = buildManifest([baseEntry], [incoming]);
     expect(result[0].title).toBe('Morning Mist'); // preserved from existing
   });
 
   it('preserves manually-set order from existing manifest', () => {
     const incoming = { ...baseEntry, order: 99 };
-    const result = mergeManifest([baseEntry], [incoming]);
+    const result = buildManifest([baseEntry], [incoming]);
     expect(result[0].order).toBe(1); // preserved from existing
   });
 
-  it('appends new entries not in the existing manifest', () => {
+  it('includes new entries not previously in the manifest', () => {
     const newEntry = { ...baseEntry, id: 'golden-hour', order: 2 };
-    const result = mergeManifest([baseEntry], [newEntry]);
+    const result = buildManifest([baseEntry], [baseEntry, newEntry]);
     expect(result).toHaveLength(2);
     expect(result.map((e) => e.id)).toContain('golden-hour');
   });
@@ -274,7 +303,7 @@ describe('mergeManifest', () => {
   it('sorts the result by order', () => {
     const entry2 = { ...baseEntry, id: 'second', order: 2 };
     const entry3 = { ...baseEntry, id: 'third', order: 3 };
-    const result = mergeManifest([entry3, baseEntry], [entry2]);
+    const result = buildManifest([], [entry3, baseEntry, entry2]);
     expect(result.map((e) => e.order)).toEqual([1, 2, 3]);
   });
 });
