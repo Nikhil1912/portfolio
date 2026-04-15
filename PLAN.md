@@ -37,6 +37,11 @@ All architectural and tooling decisions made during planning. This is the canoni
 | Lightbox zoom buttons | Hidden via `render={{ buttonZoom: () => null }}` | Zoom via scroll (desktop) and pinch (mobile) is sufficient; toolbar buttons are redundant chrome inconsistent with the minimal lightbox spec. |
 | Page header accent rule | 2px vertical bar in track color, left of display heading, on all four pages | Site-wide typographic pattern. Colors: `bg-on-surface` (Home), `bg-primary` (Work, Contact), `bg-secondary` (Gallery). |
 | Gallery grain texture | CSS `::before` noise SVG at 4.5% opacity with `mix-blend-mode: multiply` on gallery header | Subtle film-grain reference aligned with "analog light" aesthetic. Implemented as `grain-texture` utility in globals.css. |
+| Photo type fields | `Photo` interface extended with `placeholder` (base64 data URI) and `srcset` (`PhotoSrcSet`) | Pipeline outputs these; grid and lightbox consume them directly. |
+| photos.json as canonical source | `public/photos.json` replaces `src/features/gallery/data/photos.ts` | Static import at the route level keeps data out of the client bundle; JSON is the natural output format for the processing script. |
+| Manifest build strategy | `buildManifest` replaces incoming entries only — stale entries dropped | Manifest always reflects `originals/` exactly. Manual edits (title, category, alt, order) preserved for photos still present. |
+| EXIF auto-rotation | `.rotate()` (no-arg) applied before every resize and placeholder | HEIC/JPEG from phones store pixels in sensor orientation; the EXIF tag encodes the correct rotation. Applying it early ensures all output sizes are correctly oriented. |
+| scripts/ module structure | Single file until ~300 lines; split into `lib/image.ts`, `lib/manifest.ts`, `lib/types.ts` if it grows beyond that | Every helper has exactly one consumer now. Threshold noted in the file header. |
 
 ---
 
@@ -282,29 +287,37 @@ The reusable building blocks. After this PR, all four pages can be composed from
 
 ### Tasks
 
-- [ ] **Processing script:** `scripts/process-photos.ts` — reads originals from a local `/originals` directory (gitignored), generates:
+- [x] **Processing script:** `scripts/process-photos.ts` — reads originals from a local `/originals` directory (gitignored), generates:
   - Thumbnail: 400px wide, WebP
   - Medium: 800px wide, WebP
   - Large: 1600px wide, WebP
   - Full: 2400px wide, WebP
   - Blur placeholder: 20px wide, base64 data URI
-- [ ] **Manifest generation:** Script outputs/updates `public/photos.json` with id, title, category, aspect_ratio, placeholder (base64), and relative paths to each size.
-- [ ] **npm script:** `npm run photos:process` runs the pipeline.
-- [ ] **Output directory:** Processed images go to `public/photos/[id]/` (for local dev). Gitignored.
-- [ ] **Update PhotoGrid** to use base64 placeholders from the manifest (blur-up effect).
-- [ ] **Update `<img>` tags** to use `srcset` with all four sizes + `sizes` attribute for responsive delivery.
-- [ ] Write tests:
-  - Script generates correct number of variants per image
-  - Script generates valid base64 placeholder
-  - Script updates manifest with correct schema
-  - Aspect ratio calculation is correct
+- [x] **EXIF rotation:** `.rotate()` applied before every resize so portrait HEIC/JPEG files are correctly oriented in all output sizes.
+- [x] **HEIF/HEIC support:** `.heif` and `.heic` added to `SUPPORTED_EXTENSIONS` (sharp decodes via libheif natively).
+- [x] **Manifest generation:** Script outputs `public/photos.json` via `buildManifest` — only entries present in `originals/` are kept; manual edits (title, category, alt, order) are preserved on re-runs.
+- [x] **npm script:** `npm run photos:process` runs the pipeline via `tsx`.
+- [x] **Output directory:** Processed images go to `public/photos/[id]/` (for local dev). Gitignored.
+- [x] **Update PhotoGrid** to pass `srcSet` + `sizes` attributes through to `<img>` for responsive delivery.
+- [x] **Update GalleryLightbox** to use `srcset.full` for the full-res view.
+- [x] **Gallery route** reads from `public/photos.json` at the server level (static import); `GalleryPage` accepts a `photos` prop.
+- [x] **`Photo` type** extended with `placeholder: string` and `srcset: PhotoSrcSet`.
+- [x] **`tsconfig.scripts.json`** — separate Node-targeted tsconfig for `scripts/` (Node module resolution, not Next.js bundler).
+- [x] Write tests (28 tests in `scripts/process-photos.test.ts`):
+  - `filenameToId`, `idToTitle` — slug/title derivation
+  - `SUPPORTED_EXTENSIONS` — accepted and rejected formats including HEIF/HEIC
+  - `computeAspectRatio` — landscape, portrait, square, zero-height guard
+  - `generateBase64Placeholder` — EXIF rotation applied, correct MIME type, correct base64
+  - `resizeToWebP` — EXIF rotation applied, no upscaling, WebP quality, output dimensions
+  - `buildManifest` — stale entries dropped, manual edits preserved, sort order correct
 
 ### Acceptance Criteria
 
-- Running `npm run photos:process` with sample originals produces all four sizes + placeholder
-- Generated WebP files are significantly smaller than originals
-- Blur placeholders display instantly while full images load
-- `srcset` + `sizes` delivers appropriate image sizes at different viewports (verify in DevTools Network tab)
+- [x] `npm run photos:process` with real originals produces all four sizes + placeholder (verified on personal machine)
+- [x] HEIC files from iPhone processed correctly
+- [x] Portrait photos output with correct orientation (EXIF rotation applied)
+- [x] Stale placeholder entries removed from manifest after first real run
+- `srcset` + `sizes` delivers appropriate image sizes at different viewports — verify in DevTools Network tab when real photos are in place
 
 ---
 

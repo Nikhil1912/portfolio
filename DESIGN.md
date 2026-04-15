@@ -258,41 +258,55 @@ Four pages. No nested routes. Clean and flat.
 ### The Pipeline
 
 ```
-Original (10-20MB)
-  ↓ [build-time script using sharp]
-  ├── thumbnail  (400px wide, WebP, ~20-40KB)  — grid placeholder
+Original (JPEG / PNG / WebP / TIFF / HEIF / HEIC)
+  ↓ [npm run photos:process — scripts/process-photos.ts using sharp]
+  ├── thumbnail  (400px wide, WebP, ~20-40KB)   — grid low-res
   ├── medium     (800px wide, WebP, ~60-120KB)  — mobile full view
   ├── large      (1600px wide, WebP, ~150-300KB) — desktop grid / lightbox
   └── full       (2400px wide, WebP, ~300-600KB) — lightbox zoom
 ```
 
-- **Format:** WebP primary, AVIF where supported, JPEG fallback.
-- **Storage:** Cloudflare R2 bucket. Zero egress fees. Free tier: 10GB storage, 10M reads/month.
-- **Delivery:** R2 public bucket URL or Cloudflare CDN in front of it.
+- **Format:** WebP. No AVIF or JPEG fallback — WebP is supported in all modern browsers and sufficient.
+- **EXIF rotation:** Applied automatically before resizing so portrait photos from phones are correctly oriented in all output sizes.
+- **Storage:** Local `public/photos/[id]/` during development (gitignored). Cloudflare R2 in production — Phase 8.
+- **Delivery:** Local paths in dev; R2 public bucket URL in production (Phase 8).
 - **Lazy loading:** All grid images use `loading="lazy"`. Only the first row (above the fold) loads eagerly.
-- **Blur placeholder:** Generate a tiny (20px wide) blurred version of each photo at build time, inline as base64 in the HTML. Displays instantly while the real image loads (the "blur-up" technique).
-- **`srcset`:** Each `<img>` provides `srcset` with thumbnail, medium, large, and full sizes. Browser picks the best fit.
+- **Blur placeholder:** A 20px-wide blurred WebP is generated per photo and inlined as a base64 data URI in `photos.json`. Displays instantly while the real image loads (the "blur-up" technique).
+- **`srcset`:** Each `<img>` provides `srcSet` with all four sizes and a `sizes` attribute. Browser picks the best fit.
 
 ### Photo Manifest
-A `photos.json` file in the repo serves as the single source of truth:
+`public/photos.json` is the single source of truth. Generated and updated by the processing script; manual edits to `title`, `category`, `alt`, and `order` are preserved across re-runs.
 
 ```json
 [
   {
-    "id": "street-001",
+    "id": "morning-commute",
     "title": "Morning Commute",
     "category": "street",
-    "aspect_ratio": 1.5,
-    "blurhash": "LKO2?U%2Tw=w]~RBVZRi...",
-    "order": 1
+    "width": 1600,
+    "height": 900,
+    "src": "/photos/morning-commute/large.webp",
+    "alt": "Morning commute",
+    "order": 1,
+    "placeholder": "data:image/webp;base64,…",
+    "srcset": {
+      "thumbnail": "/photos/morning-commute/thumbnail.webp",
+      "medium": "/photos/morning-commute/medium.webp",
+      "large": "/photos/morning-commute/large.webp",
+      "full": "/photos/morning-commute/full.webp"
+    }
   }
 ]
 ```
 
-The build script reads this manifest, processes images, and generates the optimized variants. `next/image` is configured with a custom loader pointing to the R2 bucket.
+### Processing Workflow
+Drop originals into the gitignored `originals/` folder at the repo root, then run:
 
-### Upload Workflow
-A CLI script: `npm run photos:process` — takes originals from a local `/originals` folder, generates all sizes, uploads to R2, and updates `photos.json`.
+```bash
+npm run photos:process
+```
+
+The script generates all four WebP sizes + blur placeholder per photo, writes them to `public/photos/[id]/`, and updates `public/photos.json`. Phase 8 will extend this to also upload to R2.
 
 ---
 
@@ -304,7 +318,7 @@ A CLI script: `npm run photos:process` — takes originals from a local `/origin
 | **Styling** | Tailwind CSS v4 | Design system tokens map directly to Tailwind theme config. Utility-first, zero runtime CSS. Responsive utilities built in. |
 | **Photo Grid** | react-photo-album | Justified row layout. Lightweight. Handles responsive breakpoints. |
 | **Lightbox** | yet-another-react-lightbox + zoom plugin | Full-screen gallery with swipe, keyboard nav, zoom. Actively maintained. |
-| **Scroll Animations** | framer-motion (or CSS `@starting-style` + Intersection Observer) | Scroll-triggered reveals. Lightweight if we only import what we use. Could also go pure CSS for minimal bundle. |
+| **Scroll Animations** | CSS + Intersection Observer | Zero bundle cost. framer-motion (~32KB) dropped — everything needed is achievable in CSS. |
 | **Image Processing** | sharp (build-time script) | Generates WebP/AVIF variants at multiple sizes. Fast, battle-tested. |
 | **Image Storage** | Cloudflare R2 | Zero egress. 10GB free. Scales cheaply as archive grows. |
 | **Hosting** | Vercel (free tier) | Zero-config Next.js deploys. Edge CDN. Automatic preview deploys on PR. |
