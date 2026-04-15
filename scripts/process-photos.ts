@@ -18,6 +18,23 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+// Load .env.local before anything reads process.env — tsx does not do this
+// automatically (it's a Next.js convention, not a Node.js one).
+const REPO_ROOT_FOR_ENV = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const envLocalPath = path.join(REPO_ROOT_FOR_ENV, '.env.local');
+if (fs.existsSync(envLocalPath)) {
+  for (const line of fs.readFileSync(envLocalPath, 'utf-8').split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const eq = trimmed.indexOf('=');
+    if (eq === -1) continue;
+    const key = trimmed.slice(0, eq).trim();
+    const value = trimmed.slice(eq + 1).trim();
+    // Don't overwrite values already set in the shell environment
+    if (!(key in process.env)) process.env[key] = value;
+  }
+}
+
 import { SIZES, SUPPORTED_EXTENSIONS, filenameToId, idToTitle, generateBase64Placeholder, resizeToWebP } from './lib/image.js';
 import { loadExistingManifest, buildManifest } from './lib/manifest.js';
 import { loadR2Config, createR2Client, uploadPhotoVariants } from './lib/r2.js';

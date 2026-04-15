@@ -20,16 +20,27 @@ export function loadR2Config(): R2Config | null {
   const { R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME, R2_PUBLIC_URL } =
     process.env;
 
-  if (!R2_ACCOUNT_ID || !R2_ACCESS_KEY_ID || !R2_SECRET_ACCESS_KEY || !R2_BUCKET_NAME || !R2_PUBLIC_URL) {
+  const missing = [
+    !R2_ACCOUNT_ID && 'R2_ACCOUNT_ID',
+    !R2_ACCESS_KEY_ID && 'R2_ACCESS_KEY_ID',
+    !R2_SECRET_ACCESS_KEY && 'R2_SECRET_ACCESS_KEY',
+    !R2_BUCKET_NAME && 'R2_BUCKET_NAME',
+    !R2_PUBLIC_URL && 'R2_PUBLIC_URL',
+  ].filter(Boolean);
+
+  if (missing.length > 0) {
+    console.log(`  Missing R2 env vars: ${missing.join(', ')}`);
     return null;
   }
 
+  // All vars are present at this point — the missing check above would have
+  // returned null if any were absent. The non-null assertions are safe.
   return {
-    accountId: R2_ACCOUNT_ID,
-    accessKeyId: R2_ACCESS_KEY_ID,
-    secretAccessKey: R2_SECRET_ACCESS_KEY,
-    bucketName: R2_BUCKET_NAME,
-    publicUrl: R2_PUBLIC_URL.replace(/\/$/, ''), // strip trailing slash
+    accountId: R2_ACCOUNT_ID!,
+    accessKeyId: R2_ACCESS_KEY_ID!,
+    secretAccessKey: R2_SECRET_ACCESS_KEY!,
+    bucketName: R2_BUCKET_NAME!,
+    publicUrl: R2_PUBLIC_URL!.replace(/\/$/, ''), // strip trailing slash
   };
 }
 
