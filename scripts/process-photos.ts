@@ -8,6 +8,12 @@
  * Usage:
  *   npm run photos:process
  *   npm run photos:process -- --local-only   (same behaviour; flag reserved for Phase 8)
+ *
+ * Structure note: utilities, types, and pipeline logic are intentionally kept
+ * in this single file — every helper here has exactly one consumer (this script).
+ * If Phase 8 R2 upload logic or future additions push this significantly past
+ * ~300 lines, split into scripts/lib/image.ts (sharp utils), scripts/lib/manifest.ts,
+ * and scripts/lib/types.ts.
  */
 
 import fs from 'node:fs';
